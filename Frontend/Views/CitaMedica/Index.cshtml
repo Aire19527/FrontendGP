@@ -1,0 +1,753 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    bool isUpdate = false;
+}
+
+<div class="row">
+    <div class="col-md-6">
+
+        <h1>Citas Medicas</h1>
+    </div>
+    <div class="col-md-6">
+        <button type="button" class="btn btn-primary float-end" onclick="openModal(true)">
+            <i class="fas fa-plus-circle"></i>
+
+            Nueva Citas
+        </button>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+
+        <table id="tblCitaMedicas" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Especialista</th>
+                    <th>Fecha Hora</th>
+                    <th>Estado</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="idModalTitle">Crear proveedor</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label for="recipient-name" class="col-form-label">Paciente</label>
+                            <select id="cmbPaciente" class="form-control" onchange="seleccionarPaciente()" required>
+                                <option> Seleccionar</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="recipient-name" class="col-form-label">Fecha Hora</label>
+                            <input type="datetime-local"
+                                   class="form-control"
+                                   id="txtFecha"
+                                   placeholder="Fecha Nacimiento"
+                                   maxlength="50"
+                                   required />
+                        </div>
+                    </div>
+                    <div class="row" id="divCrear">
+                        <div class="col-md-12">
+                            <label for="recipient-name" class="col-form-label">Especialista</label>
+                            <select id="cmbEspecialista" class="form-control" onchange="seleccionarEspecialista()" required>
+                                <option> Seleccionar</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row" id="divEditar">
+                        <div class="col-md-6">
+                            <label for="recipient-name" class="col-form-label">Especialista</label>
+                            <select id="cmbEspecialistas" class="form-control" onchange="seleccionarEspecialista()" required>
+                                <option> Seleccionar</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="recipient-name" class="col-form-label">Estado</label>
+                            <select id="cmbEstado" class="form-control" onchange="seleccionarEstado()" required>
+                                <option> Seleccionar</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="recipient-name" class="col-form-label">Observaciones</label>
+                            <textarea class="form-control"
+                                      id="txtObservaciones"
+                                      placeholder="Observaciones"
+                                      maxlength="1000"
+                                      required>
+
+                            </textarea>
+
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row" id="divCitaConfirmada">
+                        <div class="col-md-12">
+                            <div class="card" style="width: 100%">
+                                <div class="card-header">
+                                    Registrar historia clinica
+                                </div>
+                                <div class="card-body">
+                                    <div class="accordion" id="accordionExample">
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header" id="headingOne">
+                                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                    Procedimientos
+                                                </button>
+                                            </h2>
+                                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                                <div class="accordion-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <label for="recipient-name" class="col-form-label">Procedimiento</label>
+                                                            <input type="text"
+                                                                   class="form-control"
+                                                                   id="txtProcedimiento"
+                                                                   placeholder="¿Procedimiento realizado?"
+                                                                   maxlength="100"
+                                                                   required />
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <label for="recipient-name" class="col-form-label">Resultado</label>
+                                                            <textarea class="form-control"
+                                                                      id="txtResultado"
+                                                                      placeholder="resultado"
+                                                                      maxlength="500"
+                                                                      required>
+                                                             </textarea>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header" id="headingTwo">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                                      Historia
+                                                </button>
+                                            </h2>
+                                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                                <div class="accordion-body">
+                                                    <div class="row">
+                                                        <dv class="col-md-12">
+                                                            <label for="recipient-name" class="col-form-label">Diagnostico</label>
+                                                            <textarea class="form-control"
+                                                                      id="txtDiagnostico"
+                                                                      placeholder="Diagnóstico del paciente"
+                                                                      maxlength="500"
+                                                                      required>
+                                                             </textarea>
+                                                        </dv>
+                                                        <div class="col-md-12">
+                                                            <label for="recipient-name" class="col-form-label">Tratatmiento</label>
+                                                            <textarea class="form-control"
+                                                                      id="txtTratamiento"
+                                                                      placeholder="Tratamiento"
+                                                                      maxlength="1000"
+                                                                      required>
+                                                             </textarea>
+                                                        </div>
+                                                        <div class="col-md-12 form-group">
+                                                            <label for="recipient-name" class="col-form-label">Medicamentos</label>
+                                                            <select class="form-control" id="cmbMedicamentos" style="width: 100%;"></select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    <i class="fas fa-window-close"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="guardar()">
+                    <i class="far fa-save"></i>
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+
+        var listCitas = [];
+        var listMedicamentos = [];
+        var listPacientes = [];
+        var listEspecialista = [];
+        var listEstado = [];
+        let idPaciente = '';
+        let idEspecialista = '';
+        let idEstado = '';
+        let idCita = '';
+        let idMedicamentos = '';
+        let validarMedicamentos = false;
+        $(document).ready(function () {
+
+            getAllCitaMedica();
+            getEspecialistas();
+            getAllPaciente();
+            getAllEstado();
+            getAllMedicamentos();
+
+            $('#divEditar').hide();
+            $('#divCrear').show();
+        });
+
+
+        function getAllCitaMedica() {
+            $.ajax({
+                url: '@Url.Action("GetAllCitaMedica", "CitaMedica")',
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log("resultado: ", data);
+
+                    listCitas = data;
+                    loadTable(listCitas);
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                }
+
+            });
+        }
+
+        function loadTable(data) {
+            let table = new DataTable('#tblCitaMedicas', {
+                data: data,
+                destroy: true,
+                responsive: true,
+                columns: [
+                    { data: 'paciente' },
+                    { data: 'especialista' },
+                    { data: 'strFecha' },
+                    { data: 'estado' },
+                    {
+                        data: null,
+                        render: function (data) {
+                            let id = data.idCita;
+                            return `
+                                                                            <button  class="btn btn-warning" onclick = "eventoEditar(`+ id + `)" > <i class="fas fa-edit" > </i> Editar</button >
+                                                                            <button class="btn btn-danger" onclick = "eventoEliminar(`+ id + `)" > <i class="far fa-trash-alt" > </i> Eliminar</button >
+                                                                            `;
+                        }
+                    }
+                ]
+            });
+        }
+
+        function eventoEditar(id) {
+            clearForm();
+            console.log(id);
+
+            idCita = id;
+            const entity = listCitas.find(x => x.idCita == idCita);
+
+            console.log('data: ', entity);
+            idPaciente = entity.idPaciente;
+            cargarPacientes(listPacientes, idPaciente);
+
+            idEspecialista = entity.idEspecialista;
+            cargarEspecialistas(listEspecialista, true,idEspecialista);
+
+            idEstado = entity.idEstado;
+            cargarEstado(listEstado, idEstado);
+
+            $("#txtObservaciones").val(entity.observaciones);
+            var now = new Date(entity.fechaHora);
+            var day = ("0" + now.getDate()).slice(-2);
+            var month = ("0" + (now.getMonth() + 1)).slice(-2);
+            var hours = ("0" + now.getHours()).slice(-2);
+            var minutes = ("0" + now.getMinutes()).slice(-2);
+            var today = now.getFullYear() + "-" + month + "-" + day + "T" + hours + ":" + minutes;
+            $("#txtFecha").val(today);
+            openModal(false);
+        }
+
+        function eventoEliminar(id) {
+
+            alertDelete().then((result) => {
+                if (result.isConfirmed) {
+                    confirmDelete(id);
+                }
+            });
+        }
+
+        function confirmDelete(idCita) {
+            $.ajax({
+                url: '@Url.Action("Delete", "CitaMedica")',
+                method: 'DELETE',
+                data: {
+                    idCitaMedica: idCita
+                },
+                dataType: 'json',
+                success: function (result) {
+                    if (result) {
+                        toastMessage("success", "Cita eliminado exitosamente");
+                        listCitas = listCitas.filter(x => x.idCita != idCita);
+                        loadTable(listCitas);
+                    } else {
+                        alertWarning("No se pudo eliminar, por favor intentarlo de nuevo");
+                    }
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                    alertError("Ha ocurrido un error interno, por favor volver a intentarlo", "Opps!");
+                }
+
+            });
+        }
+
+        function openModal(isInsert) {
+            seleccionarEstado();
+            if (isInsert) {
+                clearForm();
+                $("#idModalTitle").html("Crear cita");
+                $('#divEditar').hide();
+                $('#divCrear').show();
+                cargarEspecialistas(listEspecialista,false);
+            } else {
+                $("#idModalTitle").html("Editar cita");
+                $('#divEditar').show();
+                $('#divCrear').hide();
+
+            }
+
+            const myModal = new bootstrap.Modal('#_modal', {
+                keyboard: false
+            });
+            myModal.show();
+        }
+
+        function guardar() {
+            var medicamentosSelected = document.getElementById("cmbMedicamentos").value;
+            if (medicamentosSelected != 0) {
+                var selected = document.querySelectorAll('#cmbMedicamentos option:checked');
+                //obtener el valor del id
+                var valueString = Array.from(selected).map(el => el.attributes.value.value);
+                idMedicamentos= valueString.join(',');
+
+                console.log('ids: ', idMedicamentos);
+            }
+
+            if (validForm()) {
+                let parameter = {
+                    idEspecialista: idEspecialista,
+                    idPaciente: idPaciente,
+                    fechaHora: $("#txtFecha").val(),
+                    observaciones: $("#txtObservaciones").val(),
+                };
+
+                if (idCita == '') {
+                    eventoInsert(parameter);
+                } else {
+
+                    parameter.idCita = idCita;
+                    parameter.idEstado = idEstado;
+                    eventoUpdate(parameter);
+                }
+            }
+        }
+
+        function eventoInsert(parameter) {
+
+            $.ajax({
+                url: '@Url.Action("Insert", "CitaMedica")',
+                method: 'POST',
+                dataType: 'json',
+                data: parameter,
+                success: function (result) {
+                    if (result) {
+                        toastMessage("success", "Cita creada exitosamente");
+                        $('#_modal').modal('hide');
+                        getAllCitaMedica();
+                        clearForm();
+                    } else {
+                        alertWarning("No se pudo crear, por favor intentarlo de nuevo");
+                    }
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                    alertError("Ha ocurrido un error interno, por favor intentarlo de nuevo");
+                }
+
+            });
+        }
+
+        function eventoUpdate(parameter) {
+
+            $.ajax({
+                url: '@Url.Action("Update", "CitaMedica")',
+                method: 'PUT',
+                dataType: 'json',
+                data: parameter,
+                success: function (result) {
+                    if (result) {
+                        toastMessage("success", "Cita actualizada exitosamente");
+
+                        if (validarMedicamentos) {
+                            eventoInsertHistoria();
+                        } else {
+                            $('#_modal').modal('hide');
+                            getAllCitaMedica();
+                            clearForm();
+                        }
+                        
+                    } else {
+                        alertWarning("No se pudo actualizar, por favor intentarlo de nuevo");
+                    }
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                    alertError("Ha ocurrido un error interno, por favor intentarlo de nuevo");
+                }
+
+            });
+        }
+
+        function validForm() {
+            if (idPaciente == '') {
+                $("#cmbPaciente").focus();
+                toastMessage('warning', 'Por favor seleccionar un pacienete');
+                return false;
+            }
+
+            if ($("#txtFecha").val() == '') {
+                $("#txtFecha").focus();
+                toastMessage('warning', 'La fecha es obligatoria');
+                return false;
+            }
+
+            if (idEspecialista == '') {
+                $("#cmbEspecialista").focus();
+                toastMessage('warning', 'Por favor seleccionar un especialista');
+                return false;
+            }
+
+            if ($("#txtObservaciones").val() == '') {
+                $("#txtObservaciones").focus();
+                toastMessage('warning', 'La observación es obligatoria.');
+                return false;
+            }
+
+          
+            if (validarMedicamentos && $("#txtProcedimiento").val() == '') {
+                $("#collapseTwo").removeClass("show");
+                $("#collapseOne").addClass("show");
+                $("#txtProcedimiento").focus();
+                toastMessage('warning', 'El obligatorio registrar el procedimiento realizado.');
+                return false;
+            }
+
+            if (validarMedicamentos && $("#txtResultado").val() == '') {
+                $("#collapseTwo").removeClass("show");
+                $("#collapseOne").addClass("show");
+                $("#txtResultado").focus();
+                toastMessage('warning', 'El obligatorio registrar el resultado de la cita.');
+                return false;
+            }
+
+            if (validarMedicamentos && $("#txtDiagnostico").val() == '') {
+                $("#collapseOne").removeClass("show");
+                $("#collapseTwo").addClass("show");
+                $("#txtDiagnostico").focus();
+                toastMessage('warning', 'El obligatorio registrar el diagnostico de la cita.');
+                return false;
+            }
+
+            if (validarMedicamentos && $("#txtTratamiento").val() == '') {
+                $("#collapseOne").removeClass("show");
+                $("#collapseTwo").addClass("show");
+                $("#txtTratamiento").focus();
+                toastMessage('warning', 'El obligatorio registrar el tratamiento recomendado.');
+                return false;
+            }
+
+
+            if (validarMedicamentos && idMedicamentos == '') {
+                $("#collapseOne").removeClass("show");
+                $("#collapseTwo").addClass("show");
+                $("#cmbMedicamentos").focus();
+                toastMessage('warning', 'Es obligatorio seleccionar los medicamentos recetados');
+                return false;
+            }
+
+            return true;
+        }
+
+        function clearForm() {
+            $("#txtFecha").val("");
+            $("#txtObservaciones").val("");
+            idPaciente = '';
+            idEspecialista = '';
+            idCita = '';
+            idEstado = '';
+            cargarEspecialistas(listEspecialista,false);
+            cargarPacientes(listPacientes);
+            cargarEstado(listEstado);
+
+            $("#txtProcedimiento").val("");
+            $("#txtResultado").val("");
+            $("#txtDiagnostico").val("");
+            $("#txtTratamiento").val("");
+            $('#cmbMedicamentos').val(null).trigger('change');
+
+        }
+
+        function getEspecialistas() {
+            $.ajax({
+                url: '@Url.Action("GetAllEspecialistas", "Transversal")',
+                method: 'GET',
+                dataType: "json",
+                success: function (data) {
+
+                    listEspecialista = data;
+                    cargarEspecialistas(listEspecialista,false);
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alertError("Ha ocurrido un error interno, por favor intentarlo de nuevo");
+                }
+            });
+        }
+
+        function cargarEspecialistas(data,update, selected) {
+            if (update) {
+                $("#cmbEspecialistas").empty();
+                $("#cmbEspecialistas").append('<option value="" disabled selected>Seleccione un especialista</option>');
+                $.each(data, function (i, lista) {
+                    if (data[i].idEspecialista == selected) {
+                        $("#cmbEspecialistas").append('<option value="' + data[i].idEspecialista + '"selected>' + data[i].nombreEspecialista + '</option>');
+                    }
+                    else {
+                        $("#cmbEspecialistas").append('<option value="' + data[i].idEspecialista + '">' + data[i].nombreEspecialista + '</option>');
+                    }
+                });
+            }else{
+                $("#cmbEspecialista").empty();
+                $("#cmbEspecialista").append('<option value="" disabled selected>Seleccione un especialista</option>');
+                $.each(data, function (i, lista) {
+                    if (data[i].idEspecialista == selected) {
+                        $("#cmbEspecialista").append('<option value="' + data[i].idEspecialista + '"selected>' + data[i].nombreEspecialista + '</option>');
+                    }
+                    else {
+                        $("#cmbEspecialista").append('<option value="' + data[i].idEspecialista + '">' + data[i].nombreEspecialista + '</option>');
+                    }
+                });
+            }
+          
+        }
+
+        function seleccionarEspecialista() {
+            var combo = document.getElementById("cmbEspecialista");
+            let selected = combo.options[combo.selectedIndex].value;
+            //let text = combo.options[combo.selectedIndex].text;
+            idEspecialista = selected;
+        }
+
+        function getAllPaciente() {
+            $.ajax({
+                url: '@Url.Action("GetAllPaciente", "Paciente")',
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    listPacientes = data;
+                    cargarPacientes(listPacientes);
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                }
+
+            });
+        }
+
+        function cargarPacientes(data, selected) {
+            $("#cmbPaciente").empty();
+            $("#cmbPaciente").append('<option value="" disabled selected>Seleccione un paciente</option>');
+            $.each(data, function (i, lista) {
+                if (data[i].idPaciente == selected) {
+                    $("#cmbPaciente").append('<option value="' + data[i].idPaciente + '"selected>' + data[i].fullName + '</option>');
+                }
+                else {
+                    $("#cmbPaciente").append('<option value="' + data[i].idPaciente + '">' + data[i].fullName + '</option>');
+                }
+            });
+        }
+
+        function seleccionarPaciente() {
+            var combo = document.getElementById("cmbPaciente");
+            let selected = combo.options[combo.selectedIndex].value;
+            idPaciente = selected;
+        }
+
+        function getAllEstado() {
+            $.ajax({
+                url: '@Url.Action("GetAllEstados", "Transversal")',
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    listEstado = data;
+                    cargarEstado(listEstado);
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                }
+
+            });
+        }
+
+        function cargarEstado(data, selected) {
+            $("#cmbEstado").empty();
+            $("#cmbEstado").append('<option value="" disabled selected>Seleccione un paciente</option>');
+            $.each(data, function (i, lista) {
+                if (data[i].idEstado == selected) {
+                    $("#cmbEstado").append('<option value="' + data[i].idEstado + '"selected>' + data[i].estado + '</option>');
+                }
+                else {
+                    $("#cmbEstado").append('<option value="' + data[i].idEstado + '">' + data[i].estado + '</option>');
+                }
+            });
+        }
+
+        function seleccionarEstado() {
+            var combo = document.getElementById("cmbEstado");
+            let selected = combo.options[combo.selectedIndex].value;
+            idEstado = selected;
+
+            if(idEstado=='4'){
+                validarMedicamentos = true;
+                $('#divCitaConfirmada').show();
+            }else{
+                validarMedicamentos = false;
+                $('#divCitaConfirmada').hide();
+            }
+        }
+
+        function getAllMedicamentos() {
+            $.ajax({
+                url: '@Url.Action("GetAllMedicamentos", "Medicamentos")',
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log("resultado: ", data);
+
+                    listMedicamentos = data;
+                    console.log('Medicamentos: ', listMedicamentos);
+                    var list = transformarDataSelect2Medicamentos(listMedicamentos);
+                    $('#cmbMedicamentos').select2({
+                        width: 'resolve',
+                        placeholder: 'Seleccionar medicamentos',
+                        dropdownParent: $('#_modal'),
+                        data: list,
+                        tokenSeparators: [',', ' '],
+                        multiple: true
+                    });
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                }
+
+            });
+        }
+
+        function transformarDataSelect2Medicamentos(transformarData) {
+            //let id = 1;
+            return transformarData.map(function (med) {
+                let data = {
+                    id: med.idMedicamento,
+                    text: med.nombre + ' [Cantidad:' + med.cantidad +'] - [Dosis: '+ med.dosis+']',
+                };
+                return data;
+            });
+        }
+
+        function eventoInsertHistoria() {
+            
+            let historia = {
+                idPaciente: idPaciente,
+                resultadoExamenes: $("#txtResultado").val(),
+                tratamiento: $("#txtTratamiento").val(),
+                diagnostico: $("#txtDiagnostico").val(),
+                medicamentos: idMedicamentos.split(",").map(function (item) {
+                    return parseInt(item);
+                }),
+                procedimiento:{
+                    nombreProcedimiento: $("#txtProcedimiento").val(),
+                    Resultado: $("#txtResultado").val(),
+                    IdEspecialista: idEspecialista,
+                }
+            };
+
+             console.log('Historia: ', historia);
+
+            $.ajax({
+                url: '@Url.Action("AddHistoriaClinica", "CitaMedica")',
+                method: 'POST',
+                dataType: 'json',
+                data: historia,
+                success: function (result) {
+                    if (result) {
+                        toastMessage("success", "Historia creada exitosamente");
+                        $('#_modal').modal('hide');
+                        getAllCitaMedica();
+                        clearForm();
+                    } else {
+                        alertWarning("No se pudo crear, por favor intentarlo de nuevo");
+                    }
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                    alertError("Ha ocurrido un error interno, por favor intentarlo de nuevo");
+                }
+
+            });
+        }
+
+
+    </script>
+}

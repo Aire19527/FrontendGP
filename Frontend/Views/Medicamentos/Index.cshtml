@@ -1,0 +1,315 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="row">
+    <div class="col-md-6">
+
+        <h1>Medicamentos</h1>
+    </div>
+    <div class="col-md-6">
+        <button type="button" class="btn btn-primary float-end" onclick="openModal(true)">
+            <i class="fas fa-plus-circle"></i>
+
+            Nuevo Medicamento
+        </button>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+
+        <table id="tblMedicamentos" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Dosis</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="medicamentoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="idModalTitle">Crear proveedor</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form>
+                    <div class="row">
+                        <div class="col-md-10">
+                            <label for="recipient-name" class="col-form-label">Nombre</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="txtNombre"
+                                   placeholder="Nombre"
+                                   maxlength="100"
+                                   required />
+                        </div>
+                        <div class="col-md-2">
+                            <label for="recipient-name" class="col-form-label">Cantidad</label>
+                            <input type="number"
+                                   class="form-control"
+                                   id="txtCantidad"
+                                   placeholder="Cantidad"
+                                   required />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="recipient-name" class="col-form-label">Dosis</label>
+                            
+                            <textarea 
+                                   class="form-control"
+                                   id="txtDosis"
+                                   placeholder="Dosis"
+                                   maxlength="100"
+                                      required> </textarea>
+                        </div>                      
+                    </div>
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    <i class="fas fa-window-close"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="guardar()">
+                    <i class="far fa-save"></i>
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+
+        var listMedicamentos = [];
+        let idMedicamento = 0;
+        $(document).ready(function () {
+
+            getAllMedicamentos();
+        });
+
+
+        function getAllMedicamentos() {
+            $.ajax({
+                url: '@Url.Action("GetAllMedicamentos", "Medicamentos")',
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log("resultado: ", data);
+
+                    listMedicamentos = data;
+                    loadTable(listMedicamentos);
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                }
+
+            });
+        }
+
+        function loadTable(data) {
+            let table = new DataTable('#tblMedicamentos', {
+                data: data,
+                destroy: true,
+                responsive: true,
+                columns: [
+                    { data: 'nombre' },
+                    { data: 'cantidad' },
+                    { data: 'dosis' },
+                    {
+                        data: null,
+                        render: function (data) {
+                            let id = data.idMedicamento;
+                            return `
+                            <button  class="btn btn-warning" onclick = "editarMedicamentos(`+ id + `)" > <i class="fas fa-edit" > </i> Editar</button >
+                            <button class="btn btn-danger" onclick = "eliminarMedicamentos(`+ id + `)" > <i class="far fa-trash-alt" > </i> Eliminar</button >
+                            `;
+                        }
+                    }
+                ]
+            });
+        }
+
+        function editarMedicamentos(id) {
+            clearForm();
+            console.log(id);
+
+            idMedicamento = id;
+            const entity = listMedicamentos.find(x => x.idMedicamento == id);
+            $("#txtNombre").val(entity.nombre);
+            $("#txtDosis").val(entity.dosis);
+            $("#txtCantidad").val(entity.cantidad);
+
+            openModal(false);
+        }
+
+        function eliminarMedicamentos(id) {
+
+            alertDelete().then((result) => {
+                if (result.isConfirmed) {
+                    confirmDelete(id);
+                }
+            });
+        }
+
+        function confirmDelete(idMedicamento) {
+            $.ajax({
+                url: '@Url.Action("DeleteMedicamento", "Medicamentos")',
+                method: 'DELETE',
+                data: {
+                    idMedicamento: idMedicamento
+                },
+                dataType: 'json',
+                success: function (result) {
+                    console.log("resultado: ", result);
+
+                    if (result) {
+                        toastMessage("success", "Medicamento eliminado exitosamente");
+                        listMedicamentos = listMedicamentos.filter(x => x.idMedicamento != idMedicamento);
+                        loadTable(listMedicamentos);
+                    } else {
+                        alertWarning("No se pudo eliminar, por favor intentarlo de nuevo");
+                    }
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                    alertError("Ha ocurrido un error interno, por favor volver a intentarlo", "Opps!");
+                }
+
+            });
+        }
+
+        function openModal(isInsert) {
+            if (isInsert) {
+                clearForm();
+                $("#idModalTitle").html("Crear medicamento");
+
+            } else {
+                $("#idModalTitle").html("Editar medicamento");
+            }         
+            const myModal = new bootstrap.Modal('#medicamentoModal', {
+                keyboard: false
+            });
+            myModal.show();
+        }
+
+        function guardar() {
+            if (validForm()) {
+            
+                let parameter = {
+                    nombre: $("#txtNombre").val(),
+                    dosis: $("#txtDosis").val(),
+                    cantidad: $("#txtCantidad").val(),
+                };
+
+                console.log("id recibido: ", idMedicamento);
+
+                if (idMedicamento == 0) {
+                    insertSupplier(parameter);
+                } else {
+
+                    parameter.supplierId = idMedicamento;
+                    updateSupplier(parameter);
+                }
+            }
+        }
+
+        function insertSupplier(parameter) {
+
+            $.ajax({
+                url: '@Url.Action("AddMedicamentos", "Medicamentos")',
+                method: 'POST',
+                dataType: 'json',
+                data: parameter,
+                success: function (result) {
+                    if (result) {
+                        toastMessage("success", "Medicamento creado exitosamente");
+                        $('#medicamentoModal').modal('hide');
+                        getAllMedicamentos();
+                        clearForm();
+                    } else {
+                        alertWarning("No se pudo crear, por favor intentarlo de nuevo");
+                    }
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                    alertError("Ha ocurrido un error interno, por favor intentarlo de nuevo");
+                }
+
+            });
+        }
+
+        function updateSupplier(parameter) {
+
+            $.ajax({
+                url: '@Url.Action("UpdateMedicamento", "Medicamentos")',
+                method: 'PUT',
+                dataType: 'json',
+                data: parameter,
+                success: function (result) {
+                    if (result) {
+                        toastMessage("success", "Medicamento actualizado exitosamente");
+                        $('#medicamentoModal').modal('hide');
+                        getAllMedicamentos();
+                        clearForm();
+                    } else {
+                        alertWarning("No se pudo actualizar, por favor intentarlo de nuevo");
+                    }
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                    alertError("Ha ocurrido un error interno, por favor intentarlo de nuevo");
+                }
+
+            });
+        }
+
+        function validForm() {
+            if ($("#txtNombre").val() == '') {
+                $("#txtNombre").focus();
+                toastMessage('warning', 'El nombre es obligatoria.');
+                return false;
+            }
+            if ($("#txtDosis").val() == '') {
+                $("#txtDosis").focus();
+                toastMessage('warning', 'La dosis obligatoria.');
+                return false;
+            }
+            if ($("#txtCantidad").val() == '') {
+                $("#txtCantidad").focus();
+                toastMessage('warning', 'La cantidad es obligatoria.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function clearForm() {
+            $("#txtNombre").val("");
+            $("#txtDosis").val("");
+            $("#txtCantidad").val("");
+            idMedicamento = 0;
+        }
+
+    </script>
+}

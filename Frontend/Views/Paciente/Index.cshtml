@@ -1,0 +1,399 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<div class="row">
+    <div class="col-md-6">
+
+        <h1>Pacientes</h1>
+    </div>
+    <div class="col-md-6">
+        <button type="button" class="btn btn-primary float-end" onclick="openModal(true)">
+            <i class="fas fa-plus-circle"></i>
+
+            Nuevo Paciente
+        </button>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+
+        <table id="tblMedicamentos" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Edad</th>
+                    <th>Contacto</th>
+                    <th>Genero</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="idModalTitle">Crear proveedor</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="recipient-name" class="col-form-label">Nombre</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="txtNombre"
+                                   placeholder="Nombre"
+                                   maxlength="50"
+                                   required />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="recipient-name" class="col-form-label">Apellido</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="txtApellido"
+                                   placeholder="Apellido"
+                                   maxlength="50"
+                                   required />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="recipient-name" class="col-form-label">Genero</label>
+                            <select id="cmbSex" class="form-control" onchange="seleccionarSexo()" required>
+                                <option> Seleccionar</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="recipient-name" class="col-form-label">Fecha Nacimiento</label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="txtFechaNacimiento"
+                                   placeholder="Fecha Nacimiento"
+                                   maxlength="50"
+                                   required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="recipient-name" class="col-form-label">Teléfono</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="txtTelefono"
+                                   placeholder="Contacto"
+                                   maxlength="12"
+                                   required />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="recipient-name" class="col-form-label">Dirección</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="txtDireccion"
+                                   placeholder="Direccion"
+                                   maxlength="100"
+                                   required />
+                        </div>
+                    </div>
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    <i class="fas fa-window-close"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="guardar()">
+                    <i class="far fa-save"></i>
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+
+        var listPacientes = [];
+        var listSexs = [];
+        let idPaciente = 0;
+        let idSex = '';
+        $(document).ready(function () {
+
+            getAllPaciente();
+            getSexs();
+        });
+
+
+        function getAllPaciente() {
+            $.ajax({
+                url: '@Url.Action("GetAllPaciente", "Paciente")',
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    listPacientes = data;
+                    loadTable(listPacientes);
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                }
+
+            });
+        }
+
+        function loadTable(data) {
+            let table = new DataTable('#tblMedicamentos', {
+                data: data,
+                destroy: true,
+                responsive: true,
+                columns: [
+                    { data: 'fullName' },
+                    { data: 'strFechaNacimiento' },
+                    { data: 'telefono' },
+                    { data: 'sexo' },
+                    {
+                        data: null,
+                        render: function (data) {
+                            let id = data.idPaciente;
+                            return `
+                                    <button  class="btn btn-warning" onclick = "eventoEditar(`+ id + `)" > <i class="fas fa-edit" > </i> Editar</button >
+                                    <button class="btn btn-danger" onclick = "eventoEliminar(`+ id + `)" > <i class="far fa-trash-alt" > </i> Eliminar</button >
+                                    `;
+                        }
+                    }
+                ]
+            });
+        }
+
+        function eventoEditar(id) {
+            clearForm();
+
+            idPaciente = id;
+            const entity = listPacientes.find(x => x.idPaciente == id);
+            $("#txtNombre").val(entity.nombre);
+            $("#txtApellido").val(entity.apellido);
+            $("#txtTelefono").val(entity.telefono);
+            $("#txtDireccion").val(entity.direccion);
+            idSex = entity.idGenero;
+            cargarSexs(listSexs,idSex);
+
+            var now = new Date(entity.fechaNacimiento);
+            var day = ("0" + now.getDate()).slice(-2);
+            var month = ("0" + (now.getMonth() + 1)).slice(-2);
+            var today = now.getFullYear() + "-" + (month) + "-" + (day);
+            $("#txtFechaNacimiento").val(today);
+
+            openModal(false);
+        }
+
+        function eventoEliminar(id) {
+
+            alertDelete().then((result) => {
+                if (result.isConfirmed) {
+                    confirmDelete(id);
+                }
+            });
+        }
+
+        function confirmDelete(idPaciente) {
+            $.ajax({
+                url: '@Url.Action("Delete", "Paciente")',
+                method: 'DELETE',
+                data: {
+                    idPaciente: idPaciente
+                },
+                dataType: 'json',
+                success: function (result) {
+                    if (result) {
+                        toastMessage("success", "Paciente eliminado exitosamente");
+                        listPacientes = listPacientes.filter(x => x.idPaciente != idPaciente);
+                        loadTable(listPacientes);
+                    } else {
+                        alertWarning("No se pudo eliminar, por favor intentarlo de nuevo");
+                    }
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                    alertError("Ha ocurrido un error interno, por favor volver a intentarlo", "Opps!");
+                }
+
+            });
+        }
+
+        function openModal(isInsert) {
+            if (isInsert) {
+                clearForm();
+                $("#idModalTitle").html("Crear paciente");
+
+            } else {
+                $("#idModalTitle").html("Editar paciente");
+            }
+            const myModal = new bootstrap.Modal('#_modal', {
+                keyboard: false
+            });
+            myModal.show();
+        }
+
+        function guardar() {
+            if (validForm()) {
+                let parameter = {
+                    nombre: $("#txtNombre").val(),
+                    Apellido: $("#txtApellido").val(),
+                    FechaNacimiento: $("#txtFechaNacimiento").val(),
+                    Direccion: $("#txtDireccion").val(),
+                    Telefono: $("#txtTelefono").val(),
+                    IdGenero: idSex,
+                };
+
+                if (idPaciente == 0) {
+                    eventoInsert(parameter);
+                } else {
+
+                    parameter.idPaciente = idPaciente;
+                    eventoUpdate(parameter);
+                }
+            }
+        }
+
+        function eventoInsert(parameter) {
+
+            $.ajax({
+                url: '@Url.Action("Insert", "Paciente")',
+                method: 'POST',
+                dataType: 'json',
+                data: parameter,
+                success: function (result) {
+                    if (result) {
+                        toastMessage("success", "Paciente creado exitosamente");
+                        $('#_modal').modal('hide');
+                        getAllPaciente();
+                        clearForm();
+                    } else {
+                        alertWarning("No se pudo crear, por favor intentarlo de nuevo");
+                    }
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                    alertError("Ha ocurrido un error interno, por favor intentarlo de nuevo");
+                }
+
+            });
+        }
+
+        function eventoUpdate(parameter) {
+
+            $.ajax({
+                url: '@Url.Action("Update", "Paciente")',
+                method: 'PUT',
+                dataType: 'json',
+                data: parameter,
+                success: function (result) {
+                    if (result) {
+                        toastMessage("success", "Paciente actualizado exitosamente");
+                        $('#_modal').modal('hide');
+                        getAllPaciente();
+                        clearForm();
+                    } else {
+                        alertWarning("No se pudo actualizar, por favor intentarlo de nuevo");
+                    }
+                },
+                error: function (xhr, textStatus, error) {
+                    console.error(xhr, textStatus, error);
+                    alertError("Ha ocurrido un error interno, por favor intentarlo de nuevo");
+                }
+
+            });
+        }
+
+        function validForm() {
+            if ($("#txtNombre").val() == '') {
+                $("#txtNombre").focus();
+                toastMessage('warning', 'El nombre es obligatorio.');
+                return false;
+            }
+
+            if ($("#txtApellido").val() == '') {
+                $("#txtApellido").focus();
+                toastMessage('warning', 'El apellido es obligatorio.');
+                return false;
+            }
+            if ($("#txtFechaNacimiento").val() == '') {
+                $("#txtFechaNacimiento").focus();
+                toastMessage('warning', 'La fecha de nacimiento es obligatoria.');
+                return false;
+            }
+
+            if (idSex == '') {
+                $("#cmbSex").focus();
+                toastMessage('warning', 'El género es obligatorio.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function clearForm() {
+            $("#txtNombre").val("");
+            $("#txtApellido").val("");
+            $("#txtTelefono").val("");
+            $("#txtFechaNacimiento").val("");
+            $("#txtDireccion").val("");
+            idPaciente = 0;
+            idSex = '';
+            cargarSexs(listSexs);
+        }
+
+        function getSexs() {
+            $.ajax({
+                url: '@Url.Action("GetAllGeneros", "Transversal")',
+                method: 'GET',
+                dataType: "json",
+                success: function (data) {
+
+                    listSexs = data;
+                    cargarSexs(listSexs);
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alertError("Ha ocurrido un error interno, por favor intentarlo de nuevo");
+                }
+            });
+        }
+
+        function cargarSexs(data, selected) {
+            $("#cmbSex").empty();
+            $("#cmbSex").append('<option value="" disabled selected>Seleccione un sexo</option>');
+            $.each(data, function (i, lista) {
+                if (data[i].idGenero == selected) {
+                    $("#cmbSex").append('<option value="' + data[i].idGenero + '"selected>' + data[i].genero + '</option>');
+                }
+                else {
+                    $("#cmbSex").append('<option value="' + data[i].idGenero + '">' + data[i].genero + '</option>');
+                }
+            });
+        }
+
+        function seleccionarSexo() {
+            var combo = document.getElementById("cmbSex");
+            let selected = combo.options[combo.selectedIndex].value;
+            //let text = combo.options[combo.selectedIndex].text;
+            idSex = selected;
+        }
+
+    </script>
+}
